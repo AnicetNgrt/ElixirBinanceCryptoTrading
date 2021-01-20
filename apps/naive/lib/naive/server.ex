@@ -4,7 +4,7 @@ defmodule Naive.Server do
   require Logger
 
   defmodule State do
-    defstruct symbol_supervisor: %{}
+    defstruct symbol_supervisors: %{}
   end
 
   def start_link(_args) do

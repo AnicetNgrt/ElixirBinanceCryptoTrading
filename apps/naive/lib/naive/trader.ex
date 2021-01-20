@@ -1,5 +1,5 @@
 defmodule Naive.Trader do
-  use GenServer
+  use GenServer, restart: :temporary
   alias Streamer.Binance.TradeEvent
   alias Decimal, as: D
 
@@ -14,8 +14,8 @@ defmodule Naive.Trader do
     ]
   end
 
-  def start_link(%{} = args) do
-    GenServer.start_link(__MODULE__, args, name: :trader)
+  def start_link(%State{} = state) do
+    GenServer.start_link(__MODULE__, state)
   end
 
   def init(%{} = args) do
@@ -95,20 +95,6 @@ defmodule Naive.Trader do
 
   def handle_cast({:event, _}, state) do
     {:noreply, state}
-  end
-
-  defp fetch_tick_size(symbol) do
-    %{"filters" => filters} =
-      Binance.get_exchange_info()
-      |> elem(1)
-      |> Map.get(:symbols)
-      |> Enum.find(&(&1["symbol"] == String.upcase(symbol)))
-
-    %{"tick_size" => tick_size} =
-      filters
-      |> Enum.find(&(&1["filterType"] == "PRICE_FILTER"))
-
-    tick_size
   end
 
   defp calculate_sell_price(
