@@ -76,17 +76,19 @@ defmodule Naive.Trader do
   end
 
   # just sold state
-  def handle_cast({:event,
-    %TradeEvent{
-      seller_order_id: order_id, quantity: quantity
-    }},
-    %State{
-      sell_order: %Binance.OrderResponse{
-        order_id: order_id,
-        orig_qty: quantity
-      }
-    } = state
-  ) do
+  def handle_cast(
+        {:event,
+         %TradeEvent{
+           seller_order_id: order_id,
+           quantity: quantity
+         }},
+        %State{
+          sell_order: %Binance.OrderResponse{
+            order_id: order_id,
+            orig_qty: quantity
+          }
+        } = state
+      ) do
     Process.exit(self(), :finished)
     {:noreply, state}
   end
@@ -110,23 +112,25 @@ defmodule Naive.Trader do
   end
 
   defp calculate_sell_price(
-    buy_price,
-    profit_interval,
-    tick_size
-  ) do
+         buy_price,
+         profit_interval,
+         tick_size
+       ) do
     fee = D.new("1.001")
     original_price = D.mult(D.new(buy_price), fee)
     tick = D.new(tick_size)
 
-    net_target_price = D.mult(
-      original_price,
-      D.add("1.0", D.new(profit_interval))
-    )
+    net_target_price =
+      D.mult(
+        original_price,
+        D.add("1.0", D.new(profit_interval))
+      )
 
-    gross_target_price = D.mult(
-      net_target_price,
-      fee
-    )
+    gross_target_price =
+      D.mult(
+        net_target_price,
+        fee
+      )
 
     D.to_float(
       D.mult(
